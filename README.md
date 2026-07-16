@@ -1,7 +1,5 @@
 DataLens
-
 AI-powered, privacy-first data analysis — entirely on your device.
-
 DataLens is a single-file React application that lets you upload a data file and instantly get column profiling, visual dashboards, automatic insights, a data-quality score, and a natural-language chat interface — all without the file ever leaving your browser. There is no server, no API call, and no network request involved in analyzing your data.
 
 
@@ -42,7 +40,6 @@ Dashboard
 
 Charts adapt to whatever is in your dataset:
 
-
 Column type breakdown (pie)
 Missing values by column (bar)
 Distribution histogram for any numeric column (selectable)
@@ -73,8 +70,8 @@ Ask DataLens (chat)
 
 A natural-language interface answers questions about your data — missing values, duplicates, correlations, outliers, trends, quality score, or stats for a specific column — by reasoning over the locally computed analysis. This is a rule-based local engine, not a call to an external AI API, which is what keeps the "your data never leaves the device" guarantee intact even in chat.
 
-Export
 
+Export
 
 PDF report — opens the browser print dialog with a formatted report; choose "Save as PDF"
 JSON report — full machine-readable report (stats, insights, correlations, recommendations)
@@ -82,8 +79,8 @@ Cleaned CSV — original data with exact duplicate rows removed
 PNG — any dashboard chart, individually
 
 
-Design
 
+Design:
 
 Light and dark mode
 Responsive layout (sidebar nav on desktop, scrollable tab bar on mobile)
@@ -92,7 +89,7 @@ Smooth load/transition animations
 
 
 
-Getting started
+Getting started:
 
 DataLens is a single React component with no required backend.
 
@@ -100,12 +97,10 @@ DataLens is a single React component with no required backend.
 Drop DataLens.jsx into a React project (Create React App, Vite, Next.js, etc.)
 Install dependencies:
 
-
 bash   npm install papaparse xlsx recharts lucide-react
 
 
 Render the default export:
-
 
 jsx   import DataLensApp from './DataLens';
 
@@ -115,8 +110,6 @@ jsx   import DataLensApp from './DataLens';
 
 
 Tailwind CSS (core utility classes) should be available in the project for layout styling.
-
-
 No environment variables, API keys, or backend services are required.
 
 
@@ -126,7 +119,6 @@ StageWhat happensUploadFile is read with the browser's FileReader / File.arrayBu
 
 
 Limitations
-
 
 PDF parsing is best-effort. True PDF extraction requires a dedicated library (e.g. pdf.js) that isn't bundled here. DataLens uses a lightweight regex-based extractor that only works on simple, uncompressed, text-based PDFs. Scanned/image PDFs or PDFs with compressed content streams will show a clear on-screen notice asking you to export as TXT or CSV instead.
 Large files: datasets are capped at 20,000 rows for in-browser performance; larger files are truncated with a visible notice.
