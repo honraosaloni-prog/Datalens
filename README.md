@@ -131,5 +131,4 @@ Privacy
 
 All parsing, statistics, chart rendering, and chat happen with in-browser JavaScript. DataLens makes no fetch/XHR calls with your file's contents, uses no localStorage for your data, and has no server component. Closing the tab discards everything.
 
-screenshot
 
