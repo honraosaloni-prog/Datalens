@@ -134,4 +134,3 @@ All parsing, statistics, chart rendering, and chat happen with in-browser JavaSc
 screenshot 
 
 
-
