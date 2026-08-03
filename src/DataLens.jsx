@@ -11,7 +11,7 @@ import {
   FileText, X, Loader2, Send, RefreshCw, Table2, Hash, Calendar as CalendarIcon,
   ToggleLeft, Type as TypeIcon, ChevronDown, Sparkle, ScanLine, Beaker,
 } from 'lucide-react';
- 
+
 /* ============================================================
    THEME TOKENS
    ============================================================ */
@@ -32,7 +32,7 @@ const THEMES = {
   },
 };
 const CHART_PALETTE = ['#45D9C8', '#F2A93B', '#7DA6FF', '#E5646E', '#B084F5', '#5FD08A', '#F589B8', '#6FC7E8'];
- 
+
 const FONT_STYLE = `
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 .dl-root{font-family:'Inter',ui-sans-serif,system-ui,sans-serif;}
@@ -53,7 +53,7 @@ const FONT_STYLE = `
 }
 .dl-print-only{display:none;}
 `;
- 
+
 /* ============================================================
    PARSING HELPERS
    ============================================================ */
@@ -64,7 +64,7 @@ function toNumber(v) {
   if (s === '' || !/^-?\d+(\.\d+)?$/.test(s)) return NaN;
   return parseFloat(s);
 }
- 
+
 function isDateLike(v) {
   if (v === null || v === undefined) return false;
   const s = String(v).trim();
@@ -74,7 +74,7 @@ function isDateLike(v) {
   if (/[a-zA-Z]{3,}/.test(s) && !isNaN(Date.parse(s))) return true;
   return false;
 }
- 
+
 function parseDelimitedText(text) {
   const res = Papa.parse(text.trim(), { header: true, skipEmptyLines: true });
   if (res.meta.fields && res.meta.fields.length > 1) {
@@ -87,10 +87,10 @@ function parseDelimitedText(text) {
     warning: null,
   };
 }
- 
+
 async function parseFile(file) {
   const ext = file.name.split('.').pop().toLowerCase();
- 
+
   if (ext === 'csv') {
     const text = await file.text();
     const res = Papa.parse(text, { header: true, skipEmptyLines: true });
@@ -145,7 +145,7 @@ async function parseFile(file) {
   }
   throw new Error(`Unsupported file type: .${ext}`);
 }
- 
+
 /* ============================================================
    COLUMN TYPE INFERENCE & STATS
    ============================================================ */
@@ -156,7 +156,7 @@ function percentile(sorted, p) {
   if (lo === hi) return sorted[lo];
   return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
 }
- 
+
 function inferColumnType(values) {
   const nonNull = values.filter((v) => v !== null && v !== undefined && String(v).trim() !== '');
   if (nonNull.length === 0) return 'empty';
@@ -172,7 +172,7 @@ function inferColumnType(values) {
   if (uniqueCount <= Math.max(20, n * 0.5) && uniqueCount / n < 0.6) return 'categorical';
   return 'text';
 }
- 
+
 function numericStats(values) {
   const nums = values.map(toNumber).filter((v) => !isNaN(v));
   if (!nums.length) return null;
@@ -187,7 +187,7 @@ function numericStats(values) {
   const outlierCount = nums.filter((v) => v < lower || v > upper).length;
   return { n, mean, std, min: sorted[0], max: sorted[n - 1], q1, median, q3, iqr, lowerFence: lower, upperFence: upper, outlierCount, values: nums };
 }
- 
+
 function categoricalStats(values) {
   const nonNull = values.filter((v) => v !== null && v !== undefined && String(v).trim() !== '');
   const freq = {};
@@ -195,7 +195,7 @@ function categoricalStats(values) {
   const entries = Object.entries(freq).sort((a, b) => b[1] - a[1]);
   return { top: entries.slice(0, 8).map(([value, count]) => ({ value, count })) };
 }
- 
+
 function computeColumnProfile(name, values, totalRows) {
   const missing = values.filter((v) => v === null || v === undefined || String(v).trim() === '').length;
   const type = inferColumnType(values);
@@ -209,7 +209,7 @@ function computeColumnProfile(name, values, totalRows) {
   else profile.stats = categoricalStats(values);
   return profile;
 }
- 
+
 function pearson(xs, ys) {
   const pairs = [];
   for (let i = 0; i < xs.length; i++) {
@@ -225,7 +225,7 @@ function pearson(xs, ys) {
   if (dx === 0 || dy === 0) return null;
   return { r: num / Math.sqrt(dx * dy), n };
 }
- 
+
 function findDuplicates(rows) {
   const seen = new Map();
   let count = 0;
@@ -236,7 +236,7 @@ function findDuplicates(rows) {
   });
   return { count };
 }
- 
+
 function computeQuality(profiles, rowCount, dupCount) {
   const cols = Object.values(profiles);
   const totalCells = cols.length * rowCount;
@@ -250,7 +250,7 @@ function computeQuality(profiles, rowCount, dupCount) {
   const score = Math.round(100 * (0.4 * completeness + 0.3 * uniqueness + 0.3 * validity));
   return { score: Math.max(0, Math.min(100, score)), completeness: completeness * 100, uniqueness: uniqueness * 100, validity: validity * 100 };
 }
- 
+
 function generateInsights(profiles, meta, dup, correlations, trends, quality) {
   const out = [];
   out.push({ type: 'info', text: `Dataset contains ${meta.rowCount.toLocaleString()} rows and ${meta.colCount} columns (${meta.numericCols} numeric, ${meta.categoricalCols} categorical, ${meta.dateCols} date, ${meta.booleanCols} boolean, ${meta.textCols} text).` });
@@ -270,7 +270,7 @@ function generateInsights(profiles, meta, dup, correlations, trends, quality) {
   else out.push({ type: 'warning', text: `Overall data quality needs attention (${quality.score}/100).` });
   return out;
 }
- 
+
 function generateRecommendations(profiles, meta, dup, correlations, quality) {
   const out = [];
   Object.values(profiles).forEach((p) => {
@@ -287,7 +287,7 @@ function generateRecommendations(profiles, meta, dup, correlations, quality) {
   if (!out.length) out.push('No major data quality issues were found. This dataset looks ready for analysis.');
   return out;
 }
- 
+
 function runAnalysis(parsed) {
   const { columns, rows } = parsed;
   const totalRows = rows.length;
@@ -298,7 +298,7 @@ function runAnalysis(parsed) {
   const dup = findDuplicates(rows);
   const numericCols = columns.filter((c) => profiles[c].type === 'numeric');
   const categoricalCols = columns.filter((c) => profiles[c].type === 'categorical');
- 
+
   const correlations = [];
   for (let i = 0; i < numericCols.length; i++) {
     for (let j = i + 1; j < numericCols.length; j++) {
@@ -308,14 +308,14 @@ function runAnalysis(parsed) {
     }
   }
   correlations.sort((x, y) => Math.abs(y.r) - Math.abs(x.r));
- 
+
   const trends = [];
   numericCols.forEach((c) => {
     const idx = rows.map((_, i) => i);
     const res = pearson(idx, rows.map((r) => r[c]));
     if (res && Math.abs(res.r) >= 0.3) trends.push({ col: c, direction: res.r > 0 ? 'increasing' : 'decreasing', r: res.r });
   });
- 
+
   const quality = computeQuality(profiles, totalRows, dup.count);
   const meta = {
     rowCount: totalRows, colCount: columns.length,
@@ -325,7 +325,7 @@ function runAnalysis(parsed) {
     textCols: columns.filter((c) => profiles[c].type === 'text').length,
     emptyCols: columns.filter((c) => profiles[c].type === 'empty').length,
   };
- 
+
   const corrMatrixCols = numericCols.slice(0, 8);
   const fullCorr = {};
   corrMatrixCols.forEach((a) => {
@@ -336,16 +336,16 @@ function runAnalysis(parsed) {
       fullCorr[a][b] = res ? res.r : null;
     });
   });
- 
+
   const insights = generateInsights(profiles, meta, dup, correlations, trends, quality);
   const recommendations = generateRecommendations(profiles, meta, dup, correlations, quality);
- 
+
   return {
     profiles, dup, correlations, trends, quality, meta, insights, recommendations,
     columns, numericCols, categoricalCols, corrMatrixCols, fullCorr,
   };
 }
- 
+
 /* ============================================================
    CHAT ENGINE (fully local — no data ever leaves the browser)
    ============================================================ */
@@ -354,7 +354,7 @@ function answerQuestion(q, analysis) {
   const ql = q.toLowerCase();
   const cols = analysis.columns;
   const mentioned = cols.find((c) => ql.includes(c.toLowerCase()));
- 
+
   if (/missing|null|empty/.test(ql)) {
     if (mentioned) {
       const p = analysis.profiles[mentioned];
@@ -400,7 +400,7 @@ function answerQuestion(q, analysis) {
   }
   return `I can answer questions about missing values, duplicates, correlations, outliers, trends, data quality, or stats for a specific column (e.g. "what's the average of ${cols[0] || 'a column'}?"). You can also check the Insights tab for a full breakdown.`;
 }
- 
+
 /* ============================================================
    SAMPLE DATA (for quick demo — still 100% local)
    ============================================================ */
@@ -432,7 +432,7 @@ function generateSampleData() {
   rows[90] = { ...rows[89] };
   return { columns: Object.keys(rows[0]), rows };
 }
- 
+
 /* ============================================================
    EXPORT HELPERS
    ============================================================ */
@@ -446,7 +446,7 @@ function downloadBlob(content, filename, type) {
   a.remove();
   URL.revokeObjectURL(a.href);
 }
- 
+
 function downloadSvgAsPng(containerEl, filename) {
   if (!containerEl) return;
   const svg = containerEl.querySelector('svg');
@@ -479,7 +479,7 @@ function downloadSvgAsPng(containerEl, filename) {
   };
   img.src = url;
 }
- 
+
 function histogramBins(values, binCount = 10) {
   const nums = values.map(toNumber).filter((v) => !isNaN(v));
   if (!nums.length) return [];
@@ -495,7 +495,7 @@ function histogramBins(values, binCount = 10) {
   });
   return bins.map((b) => ({ bin: `${b.start.toFixed(1)}–${b.end.toFixed(1)}`, count: b.count }));
 }
- 
+
 function corrColor(r, theme) {
   if (r === null || r === undefined || isNaN(r)) return theme.panelAlt;
   const a = Math.min(1, Math.abs(r));
@@ -503,7 +503,7 @@ function corrColor(r, theme) {
   const mix = base.map((c) => Math.round(theme === THEMES.dark ? c * a + 17 * (1 - a) : c * a + 255 * (1 - a)));
   return `rgb(${mix[0]},${mix[1]},${mix[2]})`;
 }
- 
+
 /* ============================================================
    SMALL UI ATOMS
    ============================================================ */
@@ -514,7 +514,7 @@ function IconBadge({ Icon, color, bg }) {
     </div>
   );
 }
- 
+
 function Panel({ theme, children, className = '', style = {} }) {
   return (
     <div className={`rounded-2xl border ${className}`} style={{ background: theme.panel, borderColor: theme.border, ...style }}>
@@ -522,7 +522,7 @@ function Panel({ theme, children, className = '', style = {} }) {
     </div>
   );
 }
- 
+
 function SectionTitle({ theme, icon: Icon, title, subtitle, right }) {
   return (
     <div className="flex items-start justify-between gap-3 mb-4">
@@ -537,7 +537,7 @@ function SectionTitle({ theme, icon: Icon, title, subtitle, right }) {
     </div>
   );
 }
- 
+
 function TypeChip({ type, theme }) {
   const map = {
     numeric: { icon: Hash, color: theme.accent },
@@ -556,7 +556,7 @@ function TypeChip({ type, theme }) {
     </span>
   );
 }
- 
+
 function Gauge({ value, theme, size = 128 }) {
   const r = (size - 14) / 2;
   const c = 2 * Math.PI * r;
@@ -577,7 +577,7 @@ function Gauge({ value, theme, size = 128 }) {
     </div>
   );
 }
- 
+
 function MetricBar({ label, value, theme, color }) {
   return (
     <div>
@@ -591,7 +591,7 @@ function MetricBar({ label, value, theme, color }) {
     </div>
   );
 }
- 
+
 /* ============================================================
    MAIN APP
    ============================================================ */
@@ -603,7 +603,7 @@ const TABS = [
   { id: 'chat', label: 'Ask DataLens', icon: MessageSquare },
   { id: 'export', label: 'Export', icon: Download },
 ];
- 
+
 export default function DataLensApp() {
   const [mode, setMode] = useState('dark');
   const theme = THEMES[mode];
@@ -628,9 +628,9 @@ export default function DataLensApp() {
   const missingRef = useRef(null);
   const typesRef = useRef(null);
   const chatEndRef = useRef(null);
- 
+
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages]);
- 
+
   const finalizeDataset = useCallback((parsedObj, name) => {
     let rows = parsedObj.rows;
     let truncNote = null;
@@ -652,7 +652,7 @@ export default function DataLensApp() {
     setActiveTab('dashboard');
     setLoading(false);
   }, []);
- 
+
   const handleFile = useCallback(async (file) => {
     setError(null);
     setLoading(true);
@@ -666,7 +666,7 @@ export default function DataLensApp() {
       setLoading(false);
     }
   }, [finalizeDataset]);
- 
+
   const handleSample = useCallback(() => {
     setError(null);
     setLoading(true);
@@ -674,13 +674,13 @@ export default function DataLensApp() {
     const p = generateSampleData();
     setTimeout(() => finalizeDataset(p, 'sample-sales-data.csv'), 450);
   }, [finalizeDataset]);
- 
+
   const onDrop = useCallback((e) => {
     e.preventDefault(); setDragOver(false);
     const f = e.dataTransfer.files?.[0];
     if (f) handleFile(f);
   }, [handleFile]);
- 
+
   const sendChat = useCallback(() => {
     const q = chatInput.trim();
     if (!q) return;
@@ -691,7 +691,7 @@ export default function DataLensApp() {
       setChatMessages((m) => [...m, { role: 'assistant', text: ans }]);
     }, 300);
   }, [chatInput, analysis]);
- 
+
   const suggestedQuestions = useMemo(() => {
     if (!analysis) return [];
     const qs = ['Summarize this data', 'Any duplicates?', 'Which columns have missing values?'];
@@ -699,7 +699,7 @@ export default function DataLensApp() {
     if (analysis.numericCols[0]) qs.push(`What's the average ${analysis.numericCols[0]}?`);
     return qs.slice(0, 4);
   }, [analysis]);
- 
+
   /* ---------- export actions ---------- */
   const exportJSON = () => {
     const report = {
@@ -724,26 +724,26 @@ export default function DataLensApp() {
     downloadBlob(Papa.unparse(unique), 'datalens-cleaned-data.csv', 'text/csv');
   };
   const exportPrint = () => window.print();
- 
+
   /* ---------- derived chart data ---------- */
   const typeData = analysis ? [
     { name: 'Numeric', value: analysis.meta.numericCols }, { name: 'Categorical', value: analysis.meta.categoricalCols },
     { name: 'Date', value: analysis.meta.dateCols }, { name: 'Boolean', value: analysis.meta.booleanCols },
     { name: 'Text', value: analysis.meta.textCols },
   ].filter((d) => d.value > 0) : [];
- 
+
   const missingData = analysis ? Object.values(analysis.profiles)
     .filter((p) => p.missing > 0).sort((a, b) => b.missingPct - a.missingPct).slice(0, 10)
     .map((p) => ({ name: p.name, pct: +p.missingPct.toFixed(1) })) : [];
- 
+
   const histData = analysis && selectedNumeric ? histogramBins(parsed.rows.map((r) => r[selectedNumeric])) : [];
   const catData = analysis && selectedCat ? analysis.profiles[selectedCat].stats.top.map((t) => ({ name: t.value, count: t.count })) : [];
- 
+
   /* ---------- layout ---------- */
   return (
     <div className="dl-root min-h-screen w-full flex" style={{ background: theme.bg, color: theme.text, '--dl-border-strong': theme.borderStrong }}>
       <style>{FONT_STYLE}</style>
- 
+
       {/* -------- Sidebar (desktop) -------- */}
       <aside className="dl-noprint hidden md:flex flex-col w-60 shrink-0 border-r p-4" style={{ borderColor: theme.border, background: theme.panel }}>
         <div className="flex items-center gap-2.5 px-1 mb-8">
@@ -780,7 +780,7 @@ export default function DataLensApp() {
           </div>
         </div>
       </aside>
- 
+
       {/* -------- Main -------- */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Topbar */}
@@ -806,7 +806,7 @@ export default function DataLensApp() {
             </button>
           </div>
         </header>
- 
+
         {/* Mobile tab bar */}
         <div className="dl-noprint md:hidden flex overflow-x-auto dl-scrollbar gap-1.5 px-4 py-2 border-b" style={{ borderColor: theme.border }}>
           {TABS.map((t) => {
@@ -821,7 +821,7 @@ export default function DataLensApp() {
             );
           })}
         </div>
- 
+
         <main className="dl-noprint flex-1 overflow-y-auto dl-scrollbar p-4 md:p-7">
           {/* ============ UPLOAD ============ */}
           {activeTab === 'upload' && (
@@ -830,7 +830,7 @@ export default function DataLensApp() {
                 <h2 className="dl-display text-2xl font-bold mb-2" style={{ color: theme.text }}>Analyze your data without ever uploading it.</h2>
                 <p className="text-sm" style={{ color: theme.textSoft }}>DataLens parses, profiles, and visualizes your file entirely inside this browser tab. No server, no network call, no trace.</p>
               </div>
- 
+
               <div
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
@@ -856,13 +856,13 @@ export default function DataLensApp() {
                   </>
                 )}
               </div>
- 
+
               {error && (
                 <div className="mt-4 flex items-start gap-2 rounded-xl border px-4 py-3 text-sm" style={{ borderColor: `${theme.danger}55`, background: `${theme.danger}12`, color: theme.danger }}>
                   <AlertTriangle size={16} className="shrink-0 mt-0.5" /> {error}
                 </div>
               )}
- 
+
               <div className="mt-6 flex items-center gap-3">
                 <div className="h-px flex-1" style={{ background: theme.border }} />
                 <span className="text-xs" style={{ color: theme.textMuted }}>or</span>
@@ -874,7 +874,7 @@ export default function DataLensApp() {
                 onMouseLeave={(e) => e.currentTarget.style.background = theme.panel}>
                 <Beaker size={15} /> Try a sample dataset instead
               </button>
- 
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-8">
                 {[
                   { icon: Lock, title: 'Private by design', body: 'Files are parsed with in-browser JavaScript. Nothing is ever sent to a server.' },
@@ -890,7 +890,7 @@ export default function DataLensApp() {
               </div>
             </div>
           )}
- 
+
           {/* ============ DASHBOARD ============ */}
           {activeTab === 'dashboard' && analysis && (
             <div className="dl-fadeup space-y-5">
@@ -917,7 +917,7 @@ export default function DataLensApp() {
                   </Panel>
                 ))}
               </div>
- 
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <Panel theme={theme} className="p-5" style={{ position: 'relative' }} >
                   <div ref={typesRef}>
@@ -934,7 +934,7 @@ export default function DataLensApp() {
                   </div>
                   <button onClick={() => downloadSvgAsPng(typesRef.current, 'column-types.png')} className="absolute top-5 right-5 text-[11px] font-medium px-2.5 py-1 rounded-lg border" style={{ borderColor: theme.border, color: theme.textMuted }}>PNG</button>
                 </Panel>
- 
+
                 <Panel theme={theme} className="p-5" style={{ position: 'relative' }}>
                   <div ref={missingRef}>
                     <SectionTitle theme={theme} icon={AlertTriangle} title="Missing Values" subtitle={missingData.length ? 'Top columns by % missing' : 'No missing values found'} />
@@ -956,7 +956,7 @@ export default function DataLensApp() {
                   </div>
                   {missingData.length > 0 && <button onClick={() => downloadSvgAsPng(missingRef.current, 'missing-values.png')} className="absolute top-5 right-5 text-[11px] font-medium px-2.5 py-1 rounded-lg border" style={{ borderColor: theme.border, color: theme.textMuted }}>PNG</button>}
                 </Panel>
- 
+
                 {analysis.numericCols.length > 0 && (
                   <Panel theme={theme} className="p-5" style={{ position: 'relative' }}>
                     <div ref={histRef}>
@@ -980,7 +980,7 @@ export default function DataLensApp() {
                     <button onClick={() => downloadSvgAsPng(histRef.current, `${selectedNumeric}-distribution.png`)} className="absolute top-5 right-24 text-[11px] font-medium px-2.5 py-1 rounded-lg border" style={{ borderColor: theme.border, color: theme.textMuted }}>PNG</button>
                   </Panel>
                 )}
- 
+
                 {analysis.categoricalCols.length > 0 && (
                   <Panel theme={theme} className="p-5" style={{ position: 'relative' }}>
                     <div ref={catRef}>
@@ -1005,7 +1005,7 @@ export default function DataLensApp() {
                   </Panel>
                 )}
               </div>
- 
+
               {analysis.corrMatrixCols.length >= 2 && (
                 <Panel theme={theme} className="p-5">
                   <SectionTitle theme={theme} icon={TrendingUp} title="Correlation Matrix" subtitle="Pearson r between numeric columns (up to 8 shown)" />
@@ -1036,7 +1036,7 @@ export default function DataLensApp() {
                   </div>
                 </Panel>
               )}
- 
+
               <Panel theme={theme} className="p-5">
                 <SectionTitle theme={theme} icon={Table2} title="Data Preview" subtitle={`Showing first 8 of ${analysis.meta.rowCount.toLocaleString()} rows`} />
                 <div className="overflow-x-auto dl-scrollbar">
@@ -1064,7 +1064,7 @@ export default function DataLensApp() {
               </Panel>
             </div>
           )}
- 
+
           {/* ============ INSIGHTS ============ */}
           {activeTab === 'insights' && analysis && (
             <div className="dl-fadeup space-y-5 max-w-4xl mx-auto">
@@ -1083,7 +1083,7 @@ export default function DataLensApp() {
                   })}
                 </div>
               </Panel>
- 
+
               <Panel theme={theme} className="p-5">
                 <SectionTitle theme={theme} icon={Sparkle} title="Smart Recommendations" subtitle="Suggested next steps to improve this dataset" />
                 <div className="space-y-2.5">
@@ -1095,7 +1095,7 @@ export default function DataLensApp() {
                   ))}
                 </div>
               </Panel>
- 
+
               {analysis.trends.length > 0 && (
                 <Panel theme={theme} className="p-5">
                   <SectionTitle theme={theme} icon={TrendingUp} title="Detected Trends" subtitle="Direction across row order (proxy for sequence/time)" />
@@ -1114,7 +1114,7 @@ export default function DataLensApp() {
               )}
             </div>
           )}
- 
+
           {/* ============ QUALITY ============ */}
           {activeTab === 'quality' && analysis && (
             <div className="dl-fadeup space-y-5 max-w-4xl mx-auto">
@@ -1126,7 +1126,7 @@ export default function DataLensApp() {
                   <MetricBar label="Validity" value={analysis.quality.validity} theme={theme} color={theme.good} />
                 </div>
               </Panel>
- 
+
               <Panel theme={theme} className="p-5">
                 <SectionTitle theme={theme} icon={Table2} title="Column-by-Column Quality" />
                 <div className="overflow-x-auto dl-scrollbar">
@@ -1157,7 +1157,7 @@ export default function DataLensApp() {
               </Panel>
             </div>
           )}
- 
+
           {/* ============ CHAT ============ */}
           {activeTab === 'chat' && analysis && (
             <div className="dl-fadeup max-w-3xl mx-auto flex flex-col" style={{ height: 'calc(100vh - 170px)' }}>
@@ -1201,7 +1201,7 @@ export default function DataLensApp() {
               </Panel>
             </div>
           )}
- 
+
           {/* ============ EXPORT ============ */}
           {activeTab === 'export' && analysis && (
             <div className="dl-fadeup max-w-2xl mx-auto space-y-4">
@@ -1222,7 +1222,7 @@ export default function DataLensApp() {
               <p className="text-xs text-center pt-2" style={{ color: theme.textMuted }}>Charts can also be exported as PNG directly from the Dashboard tab.</p>
             </div>
           )}
- 
+
           {!analysis && activeTab !== 'upload' && (
             <div className="flex flex-col items-center justify-center h-full py-24 text-center">
               <FileText size={28} style={{ color: theme.textMuted }} className="mb-3" />
@@ -1231,7 +1231,7 @@ export default function DataLensApp() {
           )}
         </main>
       </div>
- 
+
       {/* -------- Print-only report -------- */}
       {analysis && (
         <div className="dl-print-only p-10" style={{ color: '#0F1A2E' }}>
