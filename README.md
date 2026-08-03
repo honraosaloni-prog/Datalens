@@ -1,16 +1,13 @@
-# React + Vite
+# DataLens
+AI-powered, privacy-first data analysis — entirely on your device.
+DataLens is a single-file React application that lets you upload a data file and instantly
+get column profiling, visual dashboards, automatic insights, a data-quality score, and a
+natural-language chat interface — all without the file ever leaving your browser. There
+is no server, no API call, and no network request involved in analyzing your data.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Why DataLens
+Most "AI data analyst" tools require uploading your file to a server before you can ask a
+single question about it. DataLens takes the opposite approach: every byte of parsing,
+statistics, chart rendering, and Q&A happens inside the browser tab you're using right
+now. Close the tab and nothing about your data persists anywhere.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
