@@ -30,3 +30,7 @@ now. Close the tab and nothing about your data persists anywhere.
         Duplicate rows — exact row-level duplicates across the dataset
         Correlations — Pearson r between all numeric column pairs
         Trends — direction of numeric columns across row orde
+
+
+#screenshot
+
