@@ -151,7 +151,7 @@ No environment variables, API keys, or backend services are required.
 
 All parsing, statistics, chart rendering, and chat happen with in-browser JavaScript. DataLens makes no `fetch`/`XHR` calls with your file's contents, uses no `localStorage` for your data, and has no server component. Closing the tab discards everything.
 
-##screenshot
+## Screenshots
 
 <img width="1365" height="654" alt="output1" src="https://github.com/user-attachments/assets/ae8e7e9e-28fd-4c11-8867-52275da705d4" />
 <img width="1353" height="656" alt="output2" src="https://github.com/user-attachments/assets/59e0e58a-6acb-435d-a9b0-a01a42133650" />
