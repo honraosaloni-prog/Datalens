@@ -3,6 +3,7 @@ DataLens
 AI-powered, privacy-first data analysis — entirely on your device.
 
 🔗 Live Demo
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://datalens-mu.vercel.app)
 
 DataLens is a single-file React application that lets you upload a data file and instantly get column profiling, visual dashboards, automatic insights, a data-quality score, and a natural-language chat interface — all without the file ever leaving your browser. There is no server, no API call, and no network request involved in analyzing your data.
 
