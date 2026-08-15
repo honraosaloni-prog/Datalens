@@ -141,7 +141,6 @@ All parsing, statistics, chart rendering, and chat happen with in-browser JavaSc
 
 <img width="1365" height="654" alt="output1" src="https://github.com/user-attachments/assets/ae8e7e9e-28fd-4c11-8867-52275da705d4" />
 <img width="1365" height="654" alt="output12" src="https://github.com/user-attachments/assets/c2ca2faf-236b-42e9-ba78-26f4a0135132" />
-
 <img width="1353" height="656" alt="output2" src="https://github.com/user-attachments/assets/59e0e58a-6acb-435d-a9b0-a01a42133650" />
 <img width="1365" height="656" alt="output4" src="https://github.com/user-attachments/assets/e707376f-4b90-4bd6-a46a-24ae4d9040c2" />
 <img width="1365" height="656" alt="output7" src="https://github.com/user-attachments/assets/456bd9c4-26c9-4356-8c27-ab31c3cd87d4" />
